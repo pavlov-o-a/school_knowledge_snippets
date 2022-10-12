@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Circles visual explanation</title>
+	<!--<script src="circles.js"></script>-->
+  </head>
+  <body style="display: flex;align-items: center;justify-content: center;width: 100vw;height: 100vh;flex-direction: column;">
+	<!--<img src="ciclist.png" width="70" style="margin-bottom:40px">-->
+    <canvas id="circleCanvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+	<label for="input_speed1">Скорость 1 (Радианы)</label>
+	<input id="input_speed1" name="input_speed1">
+	<label for="input_speed2">Скорость 2 (Радианы)</label>
+	<input id="input_speed2" name="input_speed2">
+	<div style="margin-top:6px">
+		<button id="pause" style="display:inline">Пауза(P)</button>
+		<button id="apply" style="display:inline">Применить</button>
+	</div>
+	<div id="error_message" style="display:none;color:red">Допускаются только целочисленные значения скоростей!</div>
+    <script>
+		const radius = 150
+		var step1 = 4*Math.PI/180;
+		var step2 = 6*Math.PI/180;
+		var angle1 = 0;
+		var angle2 = 0;
+		var stoped = false;
+
+		var canvas;
+		var context;
+		var centerX;
+		var centerY;
+
+		window.onload = function() {
+			init();
+			animate();
+			listenForPause();
+			listenInput();
+		};
+
+		function init() {
+			canvas = document.getElementById('circleCanvas');
+			context = canvas.getContext('2d');
+			centerX = canvas.width / 2;
+			centerY = canvas.height / 2;
+		}
+
+		function animate() {
+			if (!stoped) {
+				clearCanvas();
+				drawCircle();
+				draw1();
+				draw2();
+			}
+			setTimeout(function(){animate()}, 16);
+		}
+
+		function clearCanvas() {
+			context.clearRect(0, 0, canvas.width, canvas.height);
+		}
+
+		function drawCircle() {
+			context.beginPath();
+			context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+			context.lineWidth = 2;
+			context.strokeStyle = 'black';
+			context.stroke();
+			context.fillStyle = 'white';
+			context.fill();
+			context.fillStyle = 'black';
+			context.font = "40px serif"; 
+			context.fillText( "A", centerX + radius + 10, centerY - 5);
+			context.font = "20px serif"; 
+			context.fillText( "Колличество встреч: " + reduceFloatPrecision(Math.abs(angle1/Math.PI/2 - angle2/Math.PI/2), 0), centerX - radius, centerY + radius + 20);
+		}
+
+		function draw1() {
+			const x = radius*Math.cos(angle1);
+			const y = radius*Math.sin(angle1);
+			
+			context.beginPath();
+			context.rect(x + centerX - 3, y + centerY - 3, 6, 6);
+			context.fillStyle = 'blue';
+			context.fill();
+			
+			var distance = reduceFloatPrecision(angle1/2/Math.PI, 2) + " круга";
+			context.font = "20px serif"; 
+			context.fillText( distance, centerX - radius, centerY + radius + 40);
+			
+			angle1 += step1;
+		}
+
+		function draw2() {
+			const x = radius*Math.cos(angle2);
+			const y = radius*Math.sin(angle2);
+			
+			context.beginPath();
+			context.rect(x + centerX - 3, y + centerY - 3, 6, 6);
+			context.fillStyle = 'red';
+			context.fill();
+			
+			var distance = reduceFloatPrecision(angle2/2/Math.PI, 2) + " круга";
+			context.font = "20px serif"; 
+			context.fillText( distance, centerX - radius, centerY + radius + 60);
+			
+			angle2 += step2;
+		}
+
+		function reduceFloatPrecision(value, digits) {
+			return value.toString().substr(0, value.toString().indexOf(".") + digits)
+		}
+
+		function listenForPause() {
+			document.body.addEventListener("keydown", function (event) {
+				if (event.code === "KeyP") {
+					stoped = !stoped;
+				}			
+			});
+			document.getElementById("pause").addEventListener("click", function(){
+				stoped = !stoped;
+			});
+		}
+
+		function listenInput() {
+			var newStep1 = step1*180/Math.PI;
+			var newStep2 = step2*180/Math.PI;
+			var input1 = document.getElementById("input_speed1")
+			var input2 = document.getElementById("input_speed2")
+			input1.value = reduceFloatPrecision(step1*180/Math.PI, 2);
+			input2.value = reduceFloatPrecision(step2*180/Math.PI, 2);
+			input1.addEventListener("input", function(event) {
+				newStep1 = event.target.value;
+				changeErrorVisibility(false);
+			});
+			input2.addEventListener("input", function(event) {
+				newStep2 = event.target.value;
+				changeErrorVisibility(false);
+			});
+			document.getElementById("apply").addEventListener("click", function(){
+				if (!+newStep1 || !+newStep2) {
+					changeErrorVisibility(true);
+				} else {
+					step1 = +newStep1*Math.PI/180;
+					step2 = +newStep2*Math.PI/180;
+				}
+			});
+		}
+
+		function changeErrorVisibility(show) {
+			if (show) {
+				document.getElementById("error_message").style.display = "block";
+			} else {
+				document.getElementById("error_message").style.display = "none";
+			}
+		}
+	</script>  
+  </body>
+</html>
