@@ -1,22 +1,30 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Circles visual explanation</title>
+	<title>Circles visual explanation</title>
 	<!--<script src="circles.js"></script>-->
   </head>
   <body style="display: flex;align-items: center;justify-content: center;width: 100vw;height: 100vh;flex-direction: column;">
 	<!--<img src="ciclist.png" width="70" style="margin-bottom:40px">-->
-    <canvas id="circleCanvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
-	<label for="input_speed1">Скорость 1 (Радианы)</label>
-	<input id="input_speed1" name="input_speed1">
-	<label for="input_speed2">Скорость 2 (Радианы)</label>
-	<input id="input_speed2" name="input_speed2">
-	<div style="margin-top:6px">
-		<button id="pause" style="display:inline">Пауза(P)</button>
-		<button id="apply" style="display:inline">Применить</button>
+	<canvas id="circleCanvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+	<div style="width:500px; margin-top:20px; display:flex; flex-direction:column; align-items:center;">
+		<div style="display:flex; flex-direction:column; align-items:flex-end;">
+			<div style="display:flex; color:blue;">
+				<label for="input_speed1">Скорость 1 (Радианы):&nbsp;</label>
+				<input id="input_speed1" name="input_speed1" style="width:50px">
+			</div>
+			<div style="display:flex; color:red;">
+				<label for="input_speed2">Скорость 2 (Радианы):&nbsp;</label>
+				<input id="input_speed2" name="input_speed2" style="width:50px">
+			</div>
+			<button id="apply" style="display:inline; margin-top:5px;">Применить</button>
+		</div>
+		<div style="padding: 5px; display:inline; align-self:flex-end;">
+			<button id="pause" class="play-button">Пауза (P)</button>
+		</div>
 	</div>
 	<div id="error_message" style="display:none;color:red">Допускаются только целочисленные значения скоростей!</div>
-    <script>
+	<script>
 		const radius = 150
 		var step1 = 4*Math.PI/180;
 		var step2 = 6*Math.PI/180;
@@ -69,7 +77,7 @@
 			context.font = "40px serif"; 
 			context.fillText( "A", centerX + radius + 10, centerY - 5);
 			context.font = "20px serif"; 
-			context.fillText( "Колличество встреч: " + reduceFloatPrecision(Math.abs(angle1/Math.PI/2 - angle2/Math.PI/2), 0), centerX - radius, centerY + radius + 20);
+			context.fillText( "Количество встреч: " + reduceFloatPrecision(Math.abs(angle1/Math.PI/2 - angle2/Math.PI/2), 0), centerX - radius, centerY + radius + 20);
 		}
 
 		function draw1() {
@@ -112,10 +120,12 @@
 			document.body.addEventListener("keydown", function (event) {
 				if (event.code === "KeyP") {
 					stoped = !stoped;
-				}			
+					togglePauseButtonStyle(stoped);
+				}
 			});
 			document.getElementById("pause").addEventListener("click", function(){
 				stoped = !stoped;
+				togglePauseButtonStyle(stoped);
 			});
 		}
 
@@ -138,10 +148,16 @@
 				if (!+newStep1 || !+newStep2) {
 					changeErrorVisibility(true);
 				} else {
+					angle1 = 0;
+					angle2 = 0;
 					step1 = +newStep1*Math.PI/180;
 					step2 = +newStep2*Math.PI/180;
 				}
 			});
+		}
+
+		function togglePauseButtonStyle(stoped) {
+			document.getElementById("pause").innerText = stoped ? "Пуск (P)" : "Пауза (P)";
 		}
 
 		function changeErrorVisibility(show) {
@@ -151,6 +167,6 @@
 				document.getElementById("error_message").style.display = "none";
 			}
 		}
-	</script>  
+	</script>
   </body>
 </html>
