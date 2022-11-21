@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>Trigonometry</title>
+  </head>
+  <body style="display: flex;align-items: center;justify-content: center;width: 100vw;height: 100vh;flex-direction: column;">
+	<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+	<script>
+		const radius = 200
+		var angle = 9*Math.PI*5/4;
+		var angleAnimationStep = 0.3;
+		var currentAngle = 0;
+
+		var canvas;
+		var context;
+		var centerX;
+		var centerY;
+
+		window.onload = function() {
+			init();
+			animate();
+		};
+
+		function init() {
+			canvas = document.getElementById('canvas');
+			context = canvas.getContext('2d');
+			centerX = canvas.width / 2;
+			centerY = canvas.height / 2;
+		}
+
+		function animate() {
+			clearCanvas();
+			drawCircle();
+			drawAngle()
+			setTimeout(function(){animate()}, 16);
+		}
+
+		function clearCanvas() {
+			context.clearRect(0, 0, canvas.width, canvas.height);
+		}
+
+		function drawCircle() {
+			context.beginPath();
+			context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+			context.lineWidth = 2;
+			context.strokeStyle = 'black';
+			context.stroke();
+			context.fillStyle = 'white';
+			context.fill();
+			context.fillStyle = 'black';
+			drawLine(centerX, 0, centerX, canvas.height);
+			drawLine(0, centerY, canvas.width, centerY);
+			drawLegend("sin", centerX + 5, 30);
+			drawLegend("cos", canvas.width-45, centerY + 20);
+		}
+		
+		function drawLine(startX, startY, endX, endY) {
+			context.beginPath();
+			context.moveTo(startX, startY);
+			context.lineTo(endX, endY);
+			context.lineWidth = 2;
+			context.strokeStyle = 'black';
+			context.stroke();
+		}
+		
+		function drawLegend(name, x, y) {
+			context.fillStyle = 'black';
+			context.font = "30px serif"; 
+			context.fillText(name, x, y);
+		}
+
+		function reduceFloatPrecision(value, digits) {
+			return value.toString().substr(0, value.toString().indexOf(".") + digits)
+		}
+		
+		var spiralPoints = [];
+		
+		function drawAngle() {
+			drawLine(centerX, centerY, centerX + Math.cos(currentAngle)*radius, centerY - Math.sin(currentAngle)*radius);
+			drawSpiral();
+			if (currentAngle + angleAnimationStep > angle) {
+				currentAngle = angle - angleAnimationStep;
+			}
+			if (currentAngle + angleAnimationStep <= angle) {
+				context.beginPath();
+				var angleRadiusOffset = angle/2/Math.PI*radius/16*currentAngle/angle;
+				var newRadius = radius/4 + angleRadiusOffset;
+				var newStart = currentAngle;
+				var newEnd = currentAngle + angleAnimationStep;
+				spiralPoints.push({r: newRadius, s: newStart, e: newEnd});
+				currentAngle = currentAngle + angleAnimationStep;
+			}
+		}
+		
+		function drawSpiral() {
+			spiralPoints.forEach(function(point){
+				context.beginPath();
+				context.arc(centerX, centerY, point.r, 2*Math.PI - point.e, 2*Math.PI - point.s, false);
+				context.lineWidth = 2;
+				context.strokeStyle = 'red';
+				context.stroke();
+			});
+		}
+	</script>
+  </body>
+</html>
