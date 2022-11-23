@@ -12,8 +12,9 @@
 				<input id="input_angle_num" style="width:30px" value="5">
 				<div style="font-size:25px"> π/ </div>
 				<input id="input_angle_del" style="width:30px" value="4">
+				<div id="angle_result" style="margin-left:10px; color:gray;"></div>
 			</div>
-			<button id="apply" style="display:inline; margin-top:5px;">Применить</button>
+			<button id="angle_apply" style="display:inline; margin-top:5px;">Применить</button>
 		</div>
 	</div>
 	<script>
@@ -24,10 +25,11 @@
 		var centerX;
 		var centerY;
 		
-		var angle = Math.PI*5/4;
-		var sign = 1;
+		var angle;
+		var sign;
 
 		window.onload = function() {
+			setNewAngle(Math.PI*5/4, 1);
 			init();
 			animate();
 			listenInput();
@@ -75,12 +77,12 @@
 			});
 		}
 		
-		function drawLine(startX, startY, endX, endY) {
+		function drawLine(startX, startY, endX, endY, style, width) {
 			context.beginPath();
 			context.moveTo(startX, startY);
 			context.lineTo(endX, endY);
-			context.lineWidth = 2;
-			context.strokeStyle = 'black';
+			if (width) context.lineWidth = width; else context.lineWidth = 2;
+			if (style) context.strokeStyle = style; else context.strokeStyle = 'black';
 			context.stroke();
 		}
 		
@@ -133,23 +135,28 @@
 		function drawAngle() {
 			drawLine(centerX, centerY, centerX + Math.cos(currentAngle)*radius, centerY - sign*Math.sin(currentAngle)*radius);
 			drawSpiral();
-			if (currentAngle + angleAnimationStep > angle) {
-				currentAngle = angle - angleAnimationStep;
-			}
-			if (currentAngle + angleAnimationStep <= angle) {
-				context.beginPath();
+			if (currentAngle < angle) {
 				var angleRadiusOffset = angle/2/Math.PI*radius/16*currentAngle/angle;
 				var newRadius = radius/4 + angleRadiusOffset;
 				var newStart = currentAngle;
-				var newEnd = currentAngle + angleAnimationStep;
+				var newEnd = Math.min(currentAngle + angleAnimationStep, angle);
 				spiralPoints.push({r: newRadius, s: newStart, e: newEnd});
-				currentAngle = currentAngle + angleAnimationStep;
+				currentAngle = newEnd
+			} else  {
+				// final point. end of animation
+				drawLine(centerX + Math.cos(currentAngle)*radius, centerY, centerX + Math.cos(currentAngle)*radius, centerY - sign*Math.sin(currentAngle)*radius, 'gray', 1);
+				drawLine(centerX, centerY - sign*Math.sin(currentAngle)*radius, centerX + Math.cos(currentAngle)*radius, centerY - sign*Math.sin(currentAngle)*radius, 'gray', 1);
 			}
 		}
 		
-		function resetAngle() {
+		function setNewAngle(_angle, _sign) {
+			angle = _angle;
+			sign = _sign;
 			currentAngle = 0;
 			spiralPoints = [];
+			
+			var result = document.getElementById("angle_result");
+			result.innerText = "угол: " + Math.round(sign*angle*180/Math.PI);
 		}
 		
 		function drawSpiral() {
@@ -169,17 +176,15 @@
 		function listenInput() {
 			var inputNum = document.getElementById("input_angle_num");
 			var inputDel = document.getElementById("input_angle_del");
-			var apply = document.getElementById("apply");
+			var apply = document.getElementById("angle_apply");
 			apply.addEventListener("click", function(){
-				console.log("apply clicked");
 				var num;
 				if (inputNum.value) num = inputNum.value; else num = 1;
 				var del;
 				if (inputDel.value) del = inputDel.value; else del = 1;
-				sign = Math.sign(num/del);
-				angle = Math.PI*Math.abs(num/del);
-				console.log("angle is " + angle);
-				resetAngle();
+				var angle = Math.PI*Math.abs(num/del);
+				var sign = Math.sign(num/del);
+				setNewAngle(angle, sign);
 			});
 		}
 	</script>
